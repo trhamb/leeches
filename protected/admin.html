@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Admin Dashboard</title>
+        <link rel="stylesheet" href="/styles.css" />
+        <link rel="icon" type="image/x-icon" href="/img/favicon.png" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+
+            <div class="tag-control">
+                <div class="title-bar">
+                    <h2>Current Event Tag</h2>
+                </div>
+
+                <div class="box-content">
+                    <input
+                        type="text"
+                        id="eventTag"
+                        placeholder="Enter event name"
+                    />
+                    <button onclick="updateEventTag()">Update Event Tag</button>
+                    <p>Current tag: <span id="currentTag">Loading...</span></p>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="title-bar">
+                        <h3>Total Feedback</h3>
+                    </div>
+
+                    <div class="box-content">
+                        <p id="totalFeedback">Loading...</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="title-bar">
+                        <h3>Today's Feedback</h3>
+                    </div>
+
+                    <div class="box-content">
+                        <p id="todayFeedback">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-list">
+                <h2>Recent Feedback</h2>
+                <div id="feedbackEntries"></div>
+            </div>
+
+            <button id="logout">Logout</button>
+        </div>
+
+        <script src="js/admin.js"></script>
+    </body>
+</html>

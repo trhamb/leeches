@@ -1,0 +1,18 @@
+{
+    "name": "leeches",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.45.6",
+        "express": "^4.21.1"
+    }
+}
