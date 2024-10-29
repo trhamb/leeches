@@ -44,4 +44,10 @@ document.querySelectorAll(".feedback img").forEach((img) => {
             alert("Error submitting feedback");
         }
     });
+
+    // Make the function available in the global scope
+    window.speakText = function (text) {
+        const speech = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(speech);
+    };
 });

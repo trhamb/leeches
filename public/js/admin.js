@@ -54,9 +54,9 @@ function displayFeedback(feedback) {
     container.innerHTML = feedback
         .map(
             (entry) => `
-        <div style="border: 1px solid #ddd; margin: 10px 0; padding: 10px;">
+        <div class="solo-feedback">
             <p>${entry.feedback}</p>
-            <small>Tag: ${entry.tag} | Date: ${new Date(
+            <small class="bold italic">${entry.tag} | Date: ${new Date(
                 entry.created_at
             ).toLocaleString()}</small>
         </div>

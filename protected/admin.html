@@ -8,10 +8,13 @@
         <link rel="icon" type="image/x-icon" href="/img/favicon.png" />
     </head>
     <body>
-        <div class="container">
-            <h1>Admin Dashboard</h1>
+        <div class="admin-container">
+            <div class="top-bar">
+                <h1>Admin Dashboard</h1>
+                <button id="logout" class="box-shadow">Logout</button>
+            </div>
 
-            <div class="tag-control">
+            <div class="tag-control box-shadow">
                 <div class="title-bar">
                     <h2>Current Event Tag</h2>
                 </div>
@@ -22,13 +25,15 @@
                         id="eventTag"
                         placeholder="Enter event name"
                     />
-                    <button onclick="updateEventTag()">Update Event Tag</button>
+                    <button class="box-shadow" onclick="updateEventTag()">
+                        Update Event Tag
+                    </button>
                     <p>Current tag: <span id="currentTag">Loading...</span></p>
                 </div>
             </div>
 
             <div class="stats-container">
-                <div class="stat-card">
+                <div class="stat-card box-shadow">
                     <div class="title-bar">
                         <h3>Total Feedback</h3>
                     </div>
@@ -37,7 +42,7 @@
                         <p id="totalFeedback">Loading...</p>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card box-shadow">
                     <div class="title-bar">
                         <h3>Today's Feedback</h3>
                     </div>
@@ -48,12 +53,10 @@
                 </div>
             </div>
 
-            <div class="feedback-list">
+            <!-- <div class="feedback-list box-shadow">
                 <h2>Recent Feedback</h2>
                 <div id="feedbackEntries"></div>
-            </div>
-
-            <button id="logout">Logout</button>
+            </div> -->
         </div>
 
         <script src="js/admin.js"></script>
