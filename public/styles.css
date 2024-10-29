@@ -271,6 +271,7 @@ body {
     .tag-control input {
         padding: 5px;
         font-size: 1.25rem;
+        width: 15%;
     }
 
     .tag-control button {
@@ -313,5 +314,26 @@ body {
 
     .type-count:nth-child(2n) {
         background: #e6e6e6;
+    }
+
+    select {
+        padding: 5px;
+        font-size: 1.25rem;
+        width: 15%;
+    }
+
+    #feedback-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 30px;
+        border-radius: 8px;
+        z-index: 1000;
+        text-align: center;
+        font-size: 3.5rem;
+        font-weight: 500;
     }
 }

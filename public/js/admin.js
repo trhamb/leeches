@@ -21,6 +21,15 @@ async function loadDashboard() {
         displayTypeCount(stats.today, "todayFeedback");
         document.getElementById("currentTag").textContent = stats.currentTag;
 
+        // Populate dropdown with existing tags
+        const select = document.getElementById("eventTag");
+        stats.existingTags.forEach((tag) => {
+            const option = document.createElement("option");
+            option.value = tag.tag_name;
+            option.textContent = tag.tag_name;
+            select.appendChild(option);
+        });
+
         displayFeedback(stats.recentFeedback);
     } catch (error) {
         console.error("Error loading dashboard:", error);
@@ -28,20 +37,43 @@ async function loadDashboard() {
 }
 
 async function updateEventTag() {
-    const newTag = document.getElementById("eventTag").value;
+    const existingTag = document.getElementById("eventTag").value;
+    const newTag = document.getElementById("newEventTag").value;
+    const tagToUse = existingTag || newTag;
+
+    if (!tagToUse) {
+        alert("Please either select an existing tag or enter a new one");
+        return;
+    }
+
     try {
         const response = await fetch("/admin/update-tag", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ tag: newTag }),
+            body: JSON.stringify({
+                tag: tagToUse,
+                isNew: Boolean(newTag),
+            }),
         });
 
         if (response.ok) {
-            document.getElementById("currentTag").textContent = newTag;
+            const result = await response.json();
+            document.getElementById("currentTag").textContent = result.tag;
+            document.getElementById("newEventTag").value = "";
             document.getElementById("eventTag").value = "";
-            alert("Tag updated successfully!");
+
+            if (result.isNew) {
+                // Add new tag to dropdown
+                const select = document.getElementById("eventTag");
+                const option = document.createElement("option");
+                option.value = result.tag;
+                option.textContent = result.tag;
+                select.appendChild(option);
+            }
+
+            alert(result.message);
         }
     } catch (error) {
         console.error("Error updating tag:", error);

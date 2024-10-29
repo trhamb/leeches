@@ -19,11 +19,15 @@
                     <h2>Current Event Tag</h2>
                 </div>
 
+                <!-- Replace the existing input with this -->
                 <div class="box-content">
+                    <select id="eventTag" class="tag-select">
+                        <option value="">Select existing tag</option>
+                    </select>
                     <input
                         type="text"
-                        id="eventTag"
-                        placeholder="Enter event name"
+                        id="newEventTag"
+                        placeholder="Or enter a new tag"
                     />
                     <button class="box-shadow" onclick="updateEventTag()">
                         Update Event Tag
