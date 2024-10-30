@@ -17,7 +17,9 @@ async function loadDashboard() {
         const response = await fetch("/admin/stats");
         const stats = await response.json();
 
-        displayTypeCount(stats.total, "totalFeedback");
+        // Keep this line but comment it out for later use
+        // displayTypeCount(stats.total, "totalFeedback");
+
         displayTypeCount(stats.today, "todayFeedback");
         document.getElementById("currentTag").textContent = stats.currentTag;
 
@@ -30,7 +32,8 @@ async function loadDashboard() {
             select.appendChild(option);
         });
 
-        displayFeedback(stats.recentFeedback);
+        // Comment out or remove this line since we're not using it currently
+        // displayFeedback(stats.recentFeedback);
     } catch (error) {
         console.error("Error loading dashboard:", error);
     }
@@ -40,9 +43,10 @@ async function updateEventTag() {
     const existingTag = document.getElementById("eventTag").value;
     const newTag = document.getElementById("newEventTag").value;
     const tagToUse = existingTag || newTag;
+    const currentTag = document.getElementById("currentTag").textContent;
 
     if (!tagToUse) {
-        alert("Please either select an existing tag or enter a new one");
+        alert("Please select an existing tag or enter a new one");
         return;
     }
 
@@ -58,14 +62,14 @@ async function updateEventTag() {
             }),
         });
 
-        if (response.ok) {
-            const result = await response.json();
+        const result = await response.json();
+
+        if (result.success) {
             document.getElementById("currentTag").textContent = result.tag;
             document.getElementById("newEventTag").value = "";
             document.getElementById("eventTag").value = "";
 
             if (result.isNew) {
-                // Add new tag to dropdown
                 const select = document.getElementById("eventTag");
                 const option = document.createElement("option");
                 option.value = result.tag;
@@ -74,9 +78,15 @@ async function updateEventTag() {
             }
 
             alert(result.message);
+        } else {
+            // Keep the current tag if update failed
+            document.getElementById("currentTag").textContent = currentTag;
+            alert(result.message);
         }
     } catch (error) {
         console.error("Error updating tag:", error);
+        // Keep the current tag on error
+        document.getElementById("currentTag").textContent = currentTag;
         alert("Failed to update tag");
     }
 }

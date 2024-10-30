@@ -106,6 +106,17 @@ body {
 
 /* Desktop/Regular Displays */
 @media screen and (max-height: 1079px) {
+    .box-shadow {
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .row {
+        display: flex;
+        align-content: center;
+        justify-content: space-between;
+    }
+
     header {
         display: flex;
         flex-direction: column;
@@ -143,9 +154,28 @@ body {
 
     .login-box {
         padding: 20px;
-        width: 30%;
+        width: 420px;
         border-radius: 4px;
         text-align: center;
+    }
+
+    .login-box h1 {
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .login-box img {
+        width: 100px;
+    }
+
+    .left-aligned {
+        width: 100%;
+        display: flex;
+    }
+
+    .login-box a {
+        color: black;
+        float: left;
     }
 
     .login-box form {
@@ -166,7 +196,7 @@ body {
         width: 100%;
         font-size: 1.25rem;
         padding: 10px 20px;
-        margin: 5px 0;
+        margin: 5px 5px 10px 5px;
         background-color: #008cff;
         border: none;
         color: white;
@@ -191,8 +221,10 @@ body {
     .top-bar {
         display: flex;
         justify-content: space-between;
-        padding: 10px;
+        align-items: center;
+        padding: 5px;
         border-radius: 4px;
+        margin-bottom: 5px;
     }
 
     .top-bar button {
@@ -205,9 +237,29 @@ body {
     }
 
     .admin-container {
-        padding: 20px;
+        padding: 10px;
         background-color: #e8ebf0;
         height: 100%;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .wrapper {
+        width: 60%;
+        min-width: 940px;
+        margin: 0 auto;
+    }
+
+    .title-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 100%;
+    }
+
+    .title-wrapper img {
+        width: 40px;
+        margin-right: 20px;
     }
 
     .feedback {
@@ -234,7 +286,10 @@ body {
         text-align: center;
         background-color: white;
         border-radius: 8px;
-        padding: 5px 20px 20px 20px;
+        /* margin: 20px; */
+        width: 49%;
+        height: 310px;
+        /* padding: 5px 20px 20px 20px; */
     }
 
     .feedback-list {
@@ -244,38 +299,48 @@ body {
     }
 
     .title-bar {
-        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        height: 16%;
     }
 
     .title-bar h3,
     .title-bar h2 {
         font-size: 1.5rem;
+        font-weight: 500;
     }
 
     .box-content {
         padding: 20px;
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
-    }
-
-    .stats-container .stat-card .box-content {
-        padding: 0;
+        /* height: 450px; */
     }
 
     .tag-control {
-        margin: 20px 0;
+        /* margin: 20px 0; */
         border-radius: 8px;
         background-color: white;
+        width: 49%;
+        height: 310px;
+    }
+
+    .tag-control .box-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 84%;
     }
 
     .tag-control input {
-        padding: 5px;
+        padding: 10px;
         font-size: 1.25rem;
-        width: 15%;
+        width: 100%;
     }
 
     .tag-control button {
-        padding: 6px 10px;
+        padding: 10px;
         font-size: 1.25rem;
         background-color: #008cff;
         color: white;
@@ -316,10 +381,10 @@ body {
         background: #e6e6e6;
     }
 
-    select {
-        padding: 5px;
+    .box-content select {
+        padding: 10px;
         font-size: 1.25rem;
-        width: 15%;
+        width: 100%;
     }
 
     #feedback-popup {
@@ -335,5 +400,16 @@ body {
         text-align: center;
         font-size: 3.5rem;
         font-weight: 500;
+    }
+
+    #logout {
+        padding: 10px 20px;
+        font-size: 1.25rem;
+        background-color: #008cff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: 0.2s;
     }
 }
