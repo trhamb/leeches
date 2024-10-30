@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
 
@@ -11,8 +12,20 @@ const supabaseKey =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxd3NmeGhnd2VubGRodmtzeXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk4NDg2NDksImV4cCI6MjA0NTQyNDY0OX0.SCI6fzWNoKZ6IkpjIwH83VY6vPU5XwJqF0arh-9q3BI";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(
+    express.static("public", {
+        maxAge: "1h",
+        setHeaders: (res, path) => {
+            if (path.endsWith(".css")) {
+                res.setHeader("Content-Type", "text/css");
+            }
+        },
+    })
+);
+
 app.use(express.json());
+
+app.use(cookieParser());
 
 const checkAuth = async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
@@ -39,6 +52,9 @@ app.get("/admin", checkAuth, (req, res) => {
     res.sendFile(path.join(__dirname, "protected", "admin.html"));
 });
 
+app.use(cookieParser());
+
+// Update your login endpoint
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -47,6 +63,15 @@ app.post("/login", async (req, res) => {
     });
 
     if (error) return res.status(400).send(error.message);
+
+    // Set the session token in a secure cookie
+    res.cookie("sb-access-token", data.session.access_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(200).send(data.user);
 });
 
