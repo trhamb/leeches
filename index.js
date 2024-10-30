@@ -13,7 +13,7 @@ const supabaseKey =
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.use(
-    express.static("public", {
+    express.static(path.join(__dirname, "public"), {
         maxAge: "1h",
         setHeaders: (res, path) => {
             if (path.endsWith(".css")) {
