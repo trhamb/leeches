@@ -79,7 +79,8 @@ app.get("/admin/stats", checkAuth, async (req, res) => {
     try {
         const { data: allFeedback } = await supabase
             .from("feedback")
-            .select("*");
+            .select("*")
+            .order("created_at", { ascending: false });
 
         const totalByType = {
             "Very Happy": allFeedback.filter((f) => f.feedback === "Very Happy")
@@ -128,6 +129,7 @@ app.get("/admin/stats", checkAuth, async (req, res) => {
             currentTag: currentTag?.tag_name || "No tag set",
             recentFeedback: allFeedback.slice(0, 10),
             existingTags: existingTags,
+            allFeedback: allFeedback,
         });
     } catch (error) {
         console.error("Full error details:", error);
@@ -173,9 +175,7 @@ app.post("/admin/update-tag", checkAuth, async (req, res) => {
             success: true,
             tag,
             isNew,
-            message: `Tag ${
-                isNew ? "created and" : ""
-            } set as current successfully!`,
+            message: `Tag ${isNew ? "created and" : ""}set successfully!`,
         });
     } catch (error) {
         console.error("Error updating tag:", error);

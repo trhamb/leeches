@@ -1,3 +1,9 @@
+// Pagination Variables
+let currentPage = 1;
+const entriesPerPage = 25;
+let allFeedbackData = [];
+let filteredData = [];
+
 function displayTypeCount(data, elementId) {
     const container = document.getElementById(elementId);
     container.innerHTML = Object.entries(data)
@@ -12,28 +18,85 @@ function displayTypeCount(data, elementId) {
         .join("");
 }
 
+function displayFeedbackTable(data) {
+    const tbody = document.getElementById("feedbackTableBody");
+    tbody.innerHTML = "";
+
+    const start = (currentPage - 1) * entriesPerPage;
+    const end = start + entriesPerPage;
+    const pageData = data.slice(start, end);
+
+    pageData.forEach((entry) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${new Date(entry.created_at).toLocaleString()}</td>
+            <td>${entry.feedback}</td>
+            <td>${entry.tag}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Update pagination info
+    const totalPages = Math.ceil(data.length / entriesPerPage);
+    document.getElementById(
+        "pageInfo"
+    ).textContent = `Page ${currentPage} of ${totalPages}`;
+
+    // Update button states
+    document.getElementById("prevPage").disabled = currentPage === 1;
+    document.getElementById("nextPage").disabled = currentPage === totalPages;
+
+    // Total count
+    document.getElementById(
+        "totalCount"
+    ).textContent = `Total Entries: ${data.length}`;
+}
+
+// Add this function to handle filtering
+function applyFilters() {
+    const dateFilter = document.getElementById("dateFilter").value;
+    const feedbackFilter = document.getElementById("feedbackFilter").value;
+    const tagFilter = document.getElementById("tagFilter").value;
+
+    filteredData = allFeedbackData.filter((entry) => {
+        const matchesDate =
+            !dateFilter || entry.created_at.startsWith(dateFilter);
+        const matchesFeedback =
+            !feedbackFilter || entry.feedback === feedbackFilter;
+        const matchesTag = !tagFilter || entry.tag === tagFilter;
+        return matchesDate && matchesFeedback && matchesTag;
+    });
+
+    currentPage = 1;
+    displayFeedbackTable(filteredData);
+}
+
+// Modify the existing loadDashboard function to include table initialization
 async function loadDashboard() {
     try {
         const response = await fetch("/admin/stats");
         const stats = await response.json();
-
-        // Keep this line but comment it out for later use
-        // displayTypeCount(stats.total, "totalFeedback");
 
         displayTypeCount(stats.today, "todayFeedback");
         document.getElementById("currentTag").textContent = stats.currentTag;
 
         // Populate dropdown with existing tags
         const select = document.getElementById("eventTag");
+        const tagFilter = document.getElementById("tagFilter");
         stats.existingTags.forEach((tag) => {
             const option = document.createElement("option");
             option.value = tag.tag_name;
             option.textContent = tag.tag_name;
             select.appendChild(option);
+
+            const filterOption = option.cloneNode(true);
+            tagFilter.appendChild(filterOption);
         });
 
-        // Comment out or remove this line since we're not using it currently
-        // displayFeedback(stats.recentFeedback);
+        // Store all feedback data and initialize table
+        allFeedbackData = stats.allFeedback;
+        filteredData = allFeedbackData;
+        displayFeedbackTable(filteredData);
     } catch (error) {
         console.error("Error loading dashboard:", error);
     }
@@ -112,6 +175,34 @@ document.getElementById("logout").onclick = async () => {
     await fetch("/logout", { method: "POST" });
     window.location.href = "/";
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("prevPage").addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayFeedbackTable(filteredData);
+        }
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+        const totalPages = Math.ceil(filteredData.length / entriesPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayFeedbackTable(filteredData);
+        }
+    });
+
+    // Add filter event listeners
+    document
+        .getElementById("dateFilter")
+        .addEventListener("change", applyFilters);
+    document
+        .getElementById("feedbackFilter")
+        .addEventListener("change", applyFilters);
+    document
+        .getElementById("tagFilter")
+        .addEventListener("change", applyFilters);
+});
 
 // Initialize dashboard on page load
 loadDashboard();

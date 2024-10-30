@@ -13,7 +13,7 @@
                 <div class="top-bar">
                     <div class="title-wrapper">
                         <img src="/img/logo.png" alt="" />
-                        <h1>Admin Dashboard</h1>
+                        <h1>Feedback Dashboard</h1>
                     </div>
 
                     <button id="logout" class="box-shadow">Logout</button>
@@ -58,17 +58,55 @@
                     </div>
                 </div>
 
-                <!-- <div class="stats-container">
-                    <div class="stat-card box-shadow">
-                        <div class="title-bar">
-                            <h3>Total Feedback</h3>
+                <div class="row">
+                    <div class="feedback-table-container box-shadow">
+                        <div class="title-bar feedback-bar">
+                            <h2>Feedback History</h2>
+                            <p id="totalCount"></p>
                         </div>
-
-                        <div class="box-content">
-                            <p id="totalFeedback">Loading...</p>
+                        <div class="table-controls">
+                            <div class="filters">
+                                <input
+                                    type="date"
+                                    id="dateFilter"
+                                    placeholder="Filter by date"
+                                />
+                                <select id="feedbackFilter">
+                                    <option value="">All Feedback</option>
+                                    <option value="Very Happy">
+                                        Very Happy
+                                    </option>
+                                    <option value="Happy">Happy</option>
+                                    <option value="Neutral">Neutral</option>
+                                    <option value="Unhappy">Unhappy</option>
+                                    <option value="Very Unhappy">
+                                        Very Unhappy
+                                    </option>
+                                </select>
+                                <select id="tagFilter">
+                                    <option value="">All Tags</option>
+                                </select>
+                            </div>
+                            <div class="pagination">
+                                <button id="prevPage">Previous</button>
+                                <span id="pageInfo">Page 1 of 1</span>
+                                <button id="nextPage">Next</button>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="feedbackTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Feedback</th>
+                                        <th>Tag</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feedbackTableBody"></tbody>
+                            </table>
                         </div>
                     </div>
-                </div> -->
+                </div>
             </div>
         </div>
 
