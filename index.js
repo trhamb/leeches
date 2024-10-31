@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const Excel = require("exceljs");
 const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
 
@@ -200,7 +201,7 @@ app.post("/admin/update-tag", checkAuth, async (req, res) => {
             success: true,
             tag,
             isNew,
-            message: `Tag ${isNew ? "created and" : ""}set successfully!`,
+            message: `Tag${isNew ? "created and" : ""} set successfully!`,
         });
     } catch (error) {
         console.error("Error updating tag:", error);
@@ -220,6 +221,137 @@ app.get("/session", async (req, res) => {
         res.status(200).send(user);
     } else {
         res.status(401).send("Unauthorized");
+    }
+});
+
+app.get("/reports", checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, "protected", "reports.html"));
+});
+
+app.post("/reports/generate", checkAuth, async (req, res) => {
+    const { tag, startDate, endDate } = req.body;
+
+    try {
+        const { data: feedbackData } = await supabase
+            .from("feedback")
+            .select("*")
+            .eq("tag", tag)
+            .gte("created_at", startDate)
+            .lte("created_at", endDate)
+            .order("created_at", { ascending: true });
+
+        // Create workbook and sheets
+        const workbook = new Excel.Workbook();
+        const summarySheet = workbook.addWorksheet("Summary");
+        const rawDataSheet = workbook.addWorksheet("Raw Data");
+
+        // Summary Sheet
+        summarySheet.columns = [
+            { header: "", width: 30 },
+            { header: "", width: 25 },
+            { header: "", width: 15 },
+        ];
+
+        // Add title
+        summarySheet.getCell("A1").value = "Feedback Report Summary";
+        summarySheet.getCell("A1").font = { bold: true, size: 14 };
+        summarySheet.getCell("A1").alignment = { horizontal: "center" };
+
+        // Add report details
+        summarySheet.getCell("A3").value = "Tag:";
+        summarySheet.getCell("B3").value = tag;
+        summarySheet.getCell("A4").value = "Date Range:";
+        summarySheet.getCell("B4").value = `${startDate} to ${endDate}`;
+        summarySheet.getCell("A5").value = "Total Responses:";
+        summarySheet.getCell("B5").value = feedbackData.length;
+
+        // Add distribution title
+        summarySheet.getCell("A7").value = "Feedback Distribution";
+        summarySheet.getCell("A7").font = { bold: true, size: 12 };
+
+        // Add distribution headers
+        summarySheet.getCell("A9").value = "Response Type";
+        summarySheet.getCell("B9").value = "Count";
+        summarySheet.getCell("C9").value = "Percentage";
+        ["A9", "B9", "C9"].forEach((cell) => {
+            summarySheet.getCell(cell).font = { bold: true };
+            summarySheet.getCell(cell).fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFE0E0E0" },
+            };
+        });
+
+        // Add distribution data
+        const feedbackTypes = [
+            "Very Happy",
+            "Happy",
+            "Neutral",
+            "Unhappy",
+            "Very Unhappy",
+        ];
+        feedbackTypes.forEach((type, index) => {
+            const count = feedbackData.filter(
+                (f) => f.feedback === type
+            ).length;
+            const percentage = ((count / feedbackData.length) * 100).toFixed(1);
+
+            summarySheet.getCell(`A${10 + index}`).value = type;
+            summarySheet.getCell(`B${10 + index}`).value = count;
+            summarySheet.getCell(`C${10 + index}`).value = `${percentage}%`;
+        });
+
+        // Raw Data Sheet
+        rawDataSheet.columns = [
+            { header: "Feedback", key: "feedback", width: 32 },
+            { header: "Tag", key: "tag", width: 14 },
+            { header: "Date", key: "date", width: 15 },
+        ];
+
+        // Style headers
+        rawDataSheet.getRow(1).font = { bold: true };
+        rawDataSheet.getRow(1).fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFE0E0E0" },
+        };
+
+        // Add data
+        feedbackData.forEach((entry) => {
+            rawDataSheet.addRow({
+                feedback: entry.feedback,
+                tag: entry.tag,
+                date: new Date(entry.created_at).toLocaleDateString(),
+            });
+        });
+
+        // Center align all cells
+        [summarySheet, rawDataSheet].forEach((sheet) => {
+            sheet.eachRow((row) => {
+                row.eachCell((cell) => {
+                    cell.alignment = {
+                        horizontal: "center",
+                        vertical: "middle",
+                    };
+                });
+            });
+        });
+
+        // Generate and send file
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=feedback-report-${tag}-${startDate}.xlsx`
+        );
+        res.send(buffer);
+    } catch (error) {
+        console.error("Error generating report:", error);
+        res.status(500).send("Error generating report");
     }
 });
 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Feedback Reports</title>
+        <link rel="stylesheet" href="/styles.css" />
+        <link rel="icon" type="image/x-icon" href="/img/favicon.png" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <div class="admin-container">
+            <div class="wrapper">
+                <div class="top-bar">
+                    <div class="title-wrapper">
+                        <img src="/img/logo.png" alt="" />
+                        <h1>Feedback Reports</h1>
+                    </div>
+                    <div class="button-wrapper">
+                        <a href="/admin"
+                            ><button class="general-button box-shadow">
+                                Dashboard
+                            </button></a
+                        >
+                        <button id="logout" class="box-shadow">Logout</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div
+                        class="feedback-chart-container box-shadow"
+                        style="width: 49%"
+                    >
+                        <div class="title-bar">
+                            <h2>Total Feedback</h2>
+                        </div>
+                        <canvas id="feedbackChart"></canvas>
+                    </div>
+                    <div
+                        class="feedback-chart-container box-shadow"
+                        style="width: 49%"
+                    >
+                        <div class="title-bar space-between">
+                            <h2>Current Tag</h2>
+                            <p id="currentTagDisplay">Loading...</p>
+                        </div>
+                        <canvas id="currentTagChart"></canvas>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="toolbar box-shadow">
+                        <select id="tagSelect">
+                            <option value="">Select Tag...</option>
+                        </select>
+                        <input type="date" id="startDate" />
+                        <input type="date" id="endDate" />
+                        <select id="exportFormat">
+                            <option value="excel">Excel (.xlsx)</option>
+                            <option value="pdf">Excel (.csv)</option>
+                        </select>
+                        <button id="generateReport" class="general-button">
+                            Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="js/reports.js"></script>
+    </body>
+</html>
