@@ -74,7 +74,13 @@ function applyFilters() {
 // Modify the existing loadDashboard function to include table initialization
 async function loadDashboard() {
     try {
-        const response = await fetch("/admin/stats");
+        const response = await fetch("/admin/stats", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    "sb-access-token"
+                )}`,
+            },
+        });
         const stats = await response.json();
 
         displayTypeCount(stats.today, "todayFeedback");
@@ -118,6 +124,9 @@ async function updateEventTag() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem(
+                    "sb-access-token"
+                )}`,
             },
             body: JSON.stringify({
                 tag: tagToUse,
@@ -172,6 +181,7 @@ function displayFeedback(feedback) {
 
 // Logout handler
 document.getElementById("logout").onclick = async () => {
+    localStorage.removeItem("sb-access-token");
     await fetch("/logout", { method: "POST" });
     window.location.href = "/";
 };

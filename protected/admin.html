@@ -22,6 +22,7 @@
                                 Reports
                             </button></a
                         >
+
                         <button id="logout" class="box-shadow">Logout</button>
                     </div>
                 </div>
@@ -119,5 +120,12 @@
         </div>
 
         <script src="js/admin.js"></script>
+        <script>
+            document.querySelector(
+                'a[href="/reports"]'
+            ).href = `/reports?token=${localStorage.getItem(
+                "sb-access-token"
+            )}`;
+        </script>
     </body>
 </html>

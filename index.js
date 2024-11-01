@@ -29,14 +29,33 @@ app.use(express.json());
 app.use(cookieParser());
 
 const checkAuth = async (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    const {
-        data: { user },
-        error,
-    } = await supabase.auth.getUser(token);
-
-    if (error || !user) {
-        return res.redirect("/login");
+    // For API routes, check Authorization header
+    if (req.path.startsWith("/admin/") || req.path.startsWith("/reports/")) {
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ error: "No token provided" });
+        }
+        const {
+            data: { user },
+            error,
+        } = await supabase.auth.getUser(token);
+        if (error || !user) {
+            return res.status(401).json({ error: "Invalid token" });
+        }
+    }
+    // For page routes, check query parameter
+    else {
+        const token = req.query.token || req.cookies["sb-access-token"];
+        if (!token) {
+            return res.redirect("/login");
+        }
+        const {
+            data: { user },
+            error,
+        } = await supabase.auth.getUser(token);
+        if (error || !user) {
+            return res.redirect("/login");
+        }
     }
     next();
 };
@@ -58,22 +77,22 @@ app.use(cookieParser());
 // Update your login endpoint
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
+    console.log("Login attempt for email:", email);
+
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
 
-    if (error) return res.status(400).send(error.message);
+    console.log("Supabase response:", data);
 
-    // Set the session token in a secure cookie
-    res.cookie("sb-access-token", data.session.access_token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    if (error) {
+        console.log("Login error:", error);
+        return res.status(400).send(error.message);
+    }
 
-    res.status(200).send(data.user);
+    // Send the complete session data for debugging
+    res.status(200).json(data);
 });
 
 app.post("/submit-feedback", async (req, res) => {

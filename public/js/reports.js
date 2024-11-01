@@ -1,5 +1,9 @@
 async function loadCharts() {
-    const response = await fetch("/admin/stats");
+    const response = await fetch("/admin/stats", {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("sb-access-token")}`,
+        },
+    });
     const stats = await response.json();
 
     console.log("Current tag:", stats.currentTag);
@@ -90,7 +94,11 @@ async function loadCharts() {
 
 async function initializeReportControls() {
     // Fetch tags for dropdown
-    const response = await fetch("/admin/stats");
+    const response = await fetch("/admin/stats", {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("sb-access-token")}`,
+        },
+    });
     const stats = await response.json();
 
     const tagSelect = document.getElementById("tagSelect");
@@ -127,6 +135,9 @@ document
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem(
+                        "sb-access-token"
+                    )}`,
                 },
                 body: JSON.stringify({
                     tag,
