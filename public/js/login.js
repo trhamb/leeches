@@ -18,7 +18,8 @@ document.getElementById("login-form").onsubmit = async (event) => {
             const data = await response.json();
             const token = data.session.access_token;
             localStorage.setItem("sb-access-token", token);
-            window.location.href = `/admin?token=${token}`;
+            document.cookie = `sb-access-token=${token}; path=/`;
+            window.location.href = "/admin";
         } else {
             const errorData = await response.text();
             console.log("Login failed:", errorData);

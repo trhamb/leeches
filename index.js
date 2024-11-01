@@ -31,33 +31,17 @@ app.use(express.json());
 app.use(cookieParser());
 
 const checkAuth = async (req, res, next) => {
-    // For API routes, check Authorization header
-    if (req.path.startsWith("/admin/") || req.path.startsWith("/reports/")) {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) {
-            return res.status(401).json({ error: "No token provided" });
-        }
-        const {
-            data: { user },
-            error,
-        } = await supabase.auth.getUser(token);
-        if (error || !user) {
-            return res.status(401).json({ error: "Invalid token" });
-        }
+    const token = req.cookies["sb-access-token"];
+    if (!token) {
+        return res.redirect("/login");
     }
-    // For page routes, check query parameter
-    else {
-        const token = req.query.token || req.cookies["sb-access-token"];
-        if (!token) {
-            return res.redirect("/login");
-        }
-        const {
-            data: { user },
-            error,
-        } = await supabase.auth.getUser(token);
-        if (error || !user) {
-            return res.redirect("/login");
-        }
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser(token);
+    if (error || !user) {
+        res.clearCookie("sb-access-token");
+        return res.redirect("/login");
     }
     next();
 };
