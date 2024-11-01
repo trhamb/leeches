@@ -1,125 +1,178 @@
 async function loadCharts() {
-    const response = await fetch("/admin/stats", {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("sb-access-token")}`,
-        },
-    });
-    const stats = await response.json();
-
-    console.log("Current tag:", stats.currentTag);
-    document.getElementById("currentTagDisplay").textContent = stats.currentTag;
-
-    // All time feedback chart
-    const ctx1 = document.getElementById("feedbackChart").getContext("2d");
-    new Chart(ctx1, {
-        type: "bar",
-        data: {
-            labels: Object.keys(stats.total),
-            datasets: [
-                {
-                    data: Object.values(stats.total),
-                    backgroundColor: [
-                        "rgba(54, 162, 235, 0.8)",
-                        "rgba(75, 192, 192, 0.8)",
-                        "rgba(255, 206, 86, 0.8)",
-                        "rgba(255, 99, 132, 0.8)",
-                        "rgba(153, 102, 255, 0.8)",
-                    ],
-                },
-            ],
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false,
-                },
+    try {
+        const response = await fetch("/admin/stats", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    "sb-access-token"
+                )}`,
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                },
-            },
-        },
-    });
-
-    // Current tag feedback chart
-    const currentTagData = {
-        "Very Happy": 0,
-        Happy: 0,
-        Neutral: 0,
-        Unhappy: 0,
-        "Very Unhappy": 0,
-    };
-
-    stats.allFeedback
-        .filter((entry) => entry.tag === stats.currentTag)
-        .forEach((entry) => {
-            currentTagData[entry.feedback]++;
         });
 
-    const ctx2 = document.getElementById("currentTagChart").getContext("2d");
-    new Chart(ctx2, {
-        type: "bar",
-        data: {
-            labels: Object.keys(currentTagData),
-            datasets: [
-                {
-                    data: Object.values(currentTagData),
-                    backgroundColor: [
-                        "rgba(54, 162, 235, 0.8)",
-                        "rgba(75, 192, 192, 0.8)",
-                        "rgba(255, 206, 86, 0.8)",
-                        "rgba(255, 99, 132, 0.8)",
-                        "rgba(153, 102, 255, 0.8)",
+        if (!response.ok) {
+            throw new Error("Failed to fetch stats");
+        }
+
+        const stats = await response.json();
+        document.getElementById("currentTagDisplay").textContent =
+            stats.currentTag || "No tag set";
+
+        // All time feedback chart
+        if (stats.total && Object.keys(stats.total).length > 0) {
+            const ctx1 = document
+                .getElementById("feedbackChart")
+                .getContext("2d");
+            new Chart(ctx1, {
+                type: "bar",
+                data: {
+                    labels: Object.keys(stats.total),
+                    datasets: [
+                        {
+                            data: Object.values(stats.total),
+                            backgroundColor: [
+                                "rgba(54, 162, 235, 0.8)",
+                                "rgba(75, 192, 192, 0.8)",
+                                "rgba(255, 206, 86, 0.8)",
+                                "rgba(255, 99, 132, 0.8)",
+                                "rgba(153, 102, 255, 0.8)",
+                            ],
+                        },
                     ],
                 },
-            ],
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        },
+                    },
                 },
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
+            });
+        } else {
+            document.getElementById("feedbackChart").innerHTML =
+                "<p>No feedback data available</p>";
+        }
+
+        // Current tag feedback chart
+        const currentTagData = {
+            "Very Happy": 0,
+            Happy: 0,
+            Neutral: 0,
+            Unhappy: 0,
+            "Very Unhappy": 0,
+        };
+
+        if (stats.allFeedback && stats.allFeedback.length > 0) {
+            stats.allFeedback
+                .filter((entry) => entry.tag === stats.currentTag)
+                .forEach((entry) => {
+                    currentTagData[entry.feedback]++;
+                });
+
+            const ctx2 = document
+                .getElementById("currentTagChart")
+                .getContext("2d");
+            new Chart(ctx2, {
+                type: "bar",
+                data: {
+                    labels: Object.keys(currentTagData),
+                    datasets: [
+                        {
+                            data: Object.values(currentTagData),
+                            backgroundColor: [
+                                "rgba(54, 162, 235, 0.8)",
+                                "rgba(75, 192, 192, 0.8)",
+                                "rgba(255, 206, 86, 0.8)",
+                                "rgba(255, 99, 132, 0.8)",
+                                "rgba(153, 102, 255, 0.8)",
+                            ],
+                        },
+                    ],
                 },
-            },
-        },
-    });
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        },
+                    },
+                },
+            });
+        } else {
+            document.getElementById("currentTagChart").innerHTML =
+                "<p>No feedback data available for current tag</p>";
+        }
+    } catch (error) {
+        console.error("Error loading charts:", error);
+        document.getElementById("currentTagDisplay").textContent =
+            "Error loading data";
+        if (error.message.includes("401")) {
+            window.location.href = "/login";
+        }
+    }
 }
 
 async function initializeReportControls() {
-    // Fetch tags for dropdown
-    const response = await fetch("/admin/stats", {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("sb-access-token")}`,
-        },
-    });
-    const stats = await response.json();
+    try {
+        // Fetch tags for dropdown
+        const response = await fetch("/admin/stats", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    "sb-access-token"
+                )}`,
+            },
+        });
 
-    const tagSelect = document.getElementById("tagSelect");
-    stats.existingTags.forEach((tag) => {
-        const option = document.createElement("option");
-        option.value = tag.tag_name;
-        option.textContent = tag.tag_name;
-        tagSelect.appendChild(option);
-    });
+        if (!response.ok) {
+            throw new Error("Failed to fetch stats");
+        }
 
-    // Set default dates (last 30 days)
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
+        const stats = await response.json();
 
-    document.getElementById("endDate").value = endDate
-        .toISOString()
-        .split("T")[0];
-    document.getElementById("startDate").value = startDate
-        .toISOString()
-        .split("T")[0];
+        const tagSelect = document.getElementById("tagSelect");
+        if (stats.existingTags && stats.existingTags.length > 0) {
+            stats.existingTags.forEach((tag) => {
+                const option = document.createElement("option");
+                option.value = tag.tag_name;
+                option.textContent = tag.tag_name;
+                tagSelect.appendChild(option);
+            });
+        } else {
+            const option = document.createElement("option");
+            option.textContent = "No tags available";
+            tagSelect.appendChild(option);
+        }
+
+        // Set default dates (last 30 days)
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+
+        document.getElementById("endDate").value = endDate
+            .toISOString()
+            .split("T")[0];
+        document.getElementById("startDate").value = startDate
+            .toISOString()
+            .split("T")[0];
+    } catch (error) {
+        console.error("Error initializing reports:", error);
+        // Provide user feedback
+        document.getElementById("tagSelect").innerHTML =
+            "<option>Error loading tags</option>";
+        // Redirect to login if authentication failed
+        if (error.message.includes("401")) {
+            window.location.href = "/login";
+        }
+    }
 }
 
 document
