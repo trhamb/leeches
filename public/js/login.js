@@ -12,8 +12,6 @@ document.getElementById("login-form").onsubmit = async (event) => {
             body: JSON.stringify({ email, password }),
         });
 
-        console.log("Response status:", response.status);
-
         if (response.ok) {
             const data = await response.json();
             const token = data.session.access_token;

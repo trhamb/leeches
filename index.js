@@ -70,8 +70,6 @@ app.post("/login", async (req, res) => {
         password,
     });
 
-    console.log("Supabase response:", data);
-
     if (error) {
         console.log("Login error:", error);
         return res.status(400).send(error.message);
@@ -287,7 +285,7 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
             },
         });
 
-        // Create pie chart
+        // Create pie chart with percentages
         const pieChart = new QuickChart();
         pieChart.setWidth(800);
         pieChart.setHeight(400);
@@ -298,7 +296,15 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
                 labels: feedbackTypes,
                 datasets: [
                     {
-                        data: chartData,
+                        data: feedbackTypes.map((type) => {
+                            const count = feedbackData.filter(
+                                (f) => f.feedback === type
+                            ).length;
+                            return (
+                                (count / feedbackData.length) *
+                                100
+                            ).toFixed(1);
+                        }),
                         backgroundColor: [
                             "rgba(54, 162, 235, 0.8)",
                             "rgba(75, 192, 192, 0.8)",
