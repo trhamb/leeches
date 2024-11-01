@@ -1,3 +1,12 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("sb-access-token");
+    if (!token) {
+        window.location.href = "/login?message=no_token";
+        return;
+    }
+    // Continue with page initialization
+});
+
 async function loadCharts() {
     try {
         const response = await fetch("/admin/stats", {
@@ -165,6 +174,7 @@ async function initializeReportControls() {
             .split("T")[0];
     } catch (error) {
         console.error("Error initializing reports:", error);
+        handleAuthError(error);
         // Provide user feedback
         document.getElementById("tagSelect").innerHTML =
             "<option>Error loading tags</option>";

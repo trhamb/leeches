@@ -29,3 +29,10 @@ document.getElementById("login-form").onsubmit = async (event) => {
         alert("An error occurred. Please try again.");
     }
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("message") === "session_expired") {
+        alert("Your session has expired. Please log in again.");
+    }
+});

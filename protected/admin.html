@@ -8,6 +8,18 @@
         <link rel="icon" type="image/x-icon" href="/img/favicon.png" />
     </head>
     <body>
+        <script>
+            // Add this at the start of the page
+            if (!window.location.href.includes("token=")) {
+                const token = localStorage.getItem("sb-access-token");
+                if (token) {
+                    window.location.href = `/admin?token=${token}`;
+                } else {
+                    window.location.href = "/login";
+                }
+            }
+        </script>
+
         <div class="admin-container">
             <div class="wrapper">
                 <div class="top-bar">

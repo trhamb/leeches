@@ -4,6 +4,26 @@ const entriesPerPage = 25;
 let allFeedbackData = [];
 let filteredData = [];
 
+function handleAuthError(error) {
+    // Check if token exists
+    const token = localStorage.getItem("sb-access-token");
+    if (!token) {
+        window.location.href = "/login?message=no_token";
+        return;
+    }
+
+    // Check for specific error types
+    if (
+        error.message.includes("401") ||
+        error.message.includes("Failed to fetch") ||
+        error.message.includes("Network Error")
+    ) {
+        localStorage.removeItem("sb-access-token");
+        window.location.href = "/login?message=session_expired";
+        return;
+    }
+}
+
 function displayTypeCount(data, elementId) {
     const container = document.getElementById(elementId);
     container.innerHTML = Object.entries(data)

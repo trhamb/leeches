@@ -271,6 +271,12 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
             { header: "", width: 15 },
         ];
 
+        // Merge A1-C1
+        summarySheet.mergeCells("A1:C1");
+        summarySheet.getCell("A1").value = "Feedback Report Summary";
+        summarySheet.getCell("A1").font = { bold: true, size: 14 };
+        summarySheet.getCell("A1").alignment = { horizontal: "center" };
+
         // Add title
         summarySheet.getCell("A1").value = "Feedback Report Summary";
         summarySheet.getCell("A1").font = { bold: true, size: 14 };
