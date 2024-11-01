@@ -1,8 +1,10 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const Excel = require("exceljs");
+const QuickChart = require("quickchart-js");
 const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
+const fetch = require("node-fetch");
 
 const app = express();
 const port = 3000;
@@ -251,6 +253,14 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
     const { tag, startDate, endDate } = req.body;
 
     try {
+        const feedbackTypes = [
+            "Very Happy",
+            "Happy",
+            "Neutral",
+            "Unhappy",
+            "Very Unhappy",
+        ];
+
         const { data: feedbackData } = await supabase
             .from("feedback")
             .select("*")
@@ -259,42 +269,123 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
             .lte("created_at", endDate)
             .order("created_at", { ascending: true });
 
+        const chartData = feedbackTypes.map(
+            (type) => feedbackData.filter((f) => f.feedback === type).length
+        );
+
+        // Create bar chart
+        const barChart = new QuickChart();
+        barChart.setWidth(800);
+        barChart.setHeight(400);
+        barChart.setVersion("2");
+        barChart.setConfig({
+            type: "bar",
+            data: {
+                labels: feedbackTypes,
+                datasets: [
+                    {
+                        label: "Feedback Distribution",
+                        data: chartData,
+                        backgroundColor: [
+                            "rgba(54, 162, 235, 0.8)",
+                            "rgba(75, 192, 192, 0.8)",
+                            "rgba(255, 206, 86, 0.8)",
+                            "rgba(255, 99, 132, 0.8)",
+                            "rgba(153, 102, 255, 0.8)",
+                        ],
+                    },
+                ],
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true },
+                },
+            },
+        });
+
+        // Create pie chart
+        const pieChart = new QuickChart();
+        pieChart.setWidth(800);
+        pieChart.setHeight(400);
+        pieChart.setVersion("2");
+        pieChart.setConfig({
+            type: "pie",
+            data: {
+                labels: feedbackTypes,
+                datasets: [
+                    {
+                        data: chartData,
+                        backgroundColor: [
+                            "rgba(54, 162, 235, 0.8)",
+                            "rgba(75, 192, 192, 0.8)",
+                            "rgba(255, 206, 86, 0.8)",
+                            "rgba(255, 99, 132, 0.8)",
+                            "rgba(153, 102, 255, 0.8)",
+                        ],
+                    },
+                ],
+            },
+        });
+
+        // Get both images
+        const barResponse = await fetch(barChart.getUrl());
+        const pieResponse = await fetch(pieChart.getUrl());
+        const barImageBuffer = await barResponse.buffer();
+        const pieImageBuffer = await pieResponse.buffer();
+
         // Create workbook and sheets
         const workbook = new Excel.Workbook();
         const summarySheet = workbook.addWorksheet("Summary");
         const rawDataSheet = workbook.addWorksheet("Raw Data");
 
-        // Summary Sheet
+        // Add both images to workbook
+        const barImageId = workbook.addImage({
+            buffer: barImageBuffer,
+            extension: "png",
+        });
+
+        const pieImageId = workbook.addImage({
+            buffer: pieImageBuffer,
+            extension: "png",
+        });
+
+        // Summary Sheet setup
         summarySheet.columns = [
             { header: "", width: 30 },
             { header: "", width: 25 },
             { header: "", width: 15 },
+            { header: "", width: 10 },
+            { header: "", width: 10 },
+            { header: "", width: 2.45 },
+            { header: "", width: 2.45 },
         ];
 
-        // Merge A1-C1
+        // Add title with merged cells
         summarySheet.mergeCells("A1:C1");
         summarySheet.getCell("A1").value = "Feedback Report Summary";
         summarySheet.getCell("A1").font = { bold: true, size: 14 };
         summarySheet.getCell("A1").alignment = { horizontal: "center" };
 
-        // Add title
-        summarySheet.getCell("A1").value = "Feedback Report Summary";
-        summarySheet.getCell("A1").font = { bold: true, size: 14 };
-        summarySheet.getCell("A1").alignment = { horizontal: "center" };
-
         // Add report details
+        summarySheet.mergeCells("B3:C3");
+        summarySheet.mergeCells("B4:C4");
+        summarySheet.mergeCells("B5:C5");
         summarySheet.getCell("A3").value = "Tag:";
+        summarySheet.getCell("A3").font = { bold: true, size: 12 };
         summarySheet.getCell("B3").value = tag;
         summarySheet.getCell("A4").value = "Date Range:";
+        summarySheet.getCell("A4").font = { bold: true, size: 12 };
         summarySheet.getCell("B4").value = `${startDate} to ${endDate}`;
         summarySheet.getCell("A5").value = "Total Responses:";
+        summarySheet.getCell("A5").font = { bold: true, size: 12 };
         summarySheet.getCell("B5").value = feedbackData.length;
 
-        // Add distribution title
-        summarySheet.getCell("A7").value = "Feedback Distribution";
-        summarySheet.getCell("A7").font = { bold: true, size: 12 };
-
         // Add distribution headers
+        summarySheet.mergeCells("A8:C8");
+        summarySheet.getCell("A8").value = "Feedback Distribution";
+        summarySheet.getCell("A8").font = { bold: true, size: 12 };
+        summarySheet.getCell("A8").alignment = { horizontal: "center" };
+
         summarySheet.getCell("A9").value = "Response Type";
         summarySheet.getCell("B9").value = "Count";
         summarySheet.getCell("C9").value = "Percentage";
@@ -308,13 +399,6 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
         });
 
         // Add distribution data
-        const feedbackTypes = [
-            "Very Happy",
-            "Happy",
-            "Neutral",
-            "Unhappy",
-            "Very Unhappy",
-        ];
         feedbackTypes.forEach((type, index) => {
             const count = feedbackData.filter(
                 (f) => f.feedback === type
@@ -325,6 +409,29 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
             summarySheet.getCell(`B${10 + index}`).value = count;
             summarySheet.getCell(`C${10 + index}`).value = `${percentage}%`;
         });
+
+        // Add both charts to sheet (side by side)
+        summarySheet.addImage(barImageId, {
+            tl: { col: 7, row: 1 },
+            ext: { width: 600, height: 300 },
+        });
+
+        summarySheet.addImage(pieImageId, {
+            tl: { col: 7, row: 18 },
+            ext: { width: 600, height: 300 },
+        });
+
+        // Fill cells A16:Q33
+        for (let row = 1; row <= 40; row++) {
+            for (let col = 6; col <= 17; col++) {
+                const cell = summarySheet.getCell(row, col);
+                cell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FF31869B" },
+                };
+            }
+        }
 
         // Raw Data Sheet
         rawDataSheet.columns = [
