@@ -7,9 +7,11 @@ const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
 const fetch = require("node-fetch");
 
+require("dotenv").config();
+
 const app = express();
 const port = 3000;
-const VALID_PIN = "4848";
+const VALID_PIN = process.env.VALID_PIN;
 
 // Supabase Client
 const supabaseUrl = "https://tqwsfxhgwenldhvksyzc.supabase.co";
