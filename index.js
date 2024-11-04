@@ -262,7 +262,7 @@ app.get("/reports", checkAuth, (req, res) => {
 });
 
 app.post("/reports/generate", checkAuth, async (req, res) => {
-    const { tag, startDate, endDate } = req.body;
+    const { tag, startDate, endDate, format } = req.body;
     const adjustedEndDate = new Date(endDate);
     adjustedEndDate.setHours(23, 59, 59, 999);
 
@@ -283,6 +283,30 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
             .lte("created_at", adjustedEndDate.toISOString())
             .order("created_at", { ascending: true });
 
+        // Handle CSV Export
+        if (format === "csv") {
+            const csvHeader = "Feedback,Tag,Date\n";
+            const csvRows = feedbackData
+                .map((entry) => {
+                    const date = new Date(
+                        entry.created_at
+                    ).toLocaleDateString();
+                    return `${entry.feedback},${entry.tag},${date}`;
+                })
+                .join("\n");
+
+            const csvContent = csvHeader + csvRows;
+
+            res.setHeader("Content-Type", "text/csv");
+            res.setHeader(
+                "Content-Disposition",
+                `attachment; filename=feedback-report-${tag}-${startDate}.csv`
+            );
+            res.send(csvContent);
+            return;
+        }
+
+        // Handle Excel Export
         const chartData = feedbackTypes.map(
             (type) => feedbackData.filter((f) => f.feedback === type).length
         );

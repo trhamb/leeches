@@ -38,18 +38,12 @@ document.querySelectorAll(".feedback img").forEach((img) => {
                 document.querySelectorAll(".feedback img").forEach((img) => {
                     img.style.pointerEvents = "auto";
                 });
-            }, 5000); // 5000 milliseconds = 5 seconds
+            }, 3500);
         } catch (error) {
             console.error("Error:", error);
             alert("Error submitting feedback");
         }
     });
-
-    // Make the function available in the global scope
-    window.speakText = function (text) {
-        const speech = new SpeechSynthesisUtterance(text);
-        window.speechSynthesis.speak(speech);
-    };
 });
 
 // Check for existing session on page load
