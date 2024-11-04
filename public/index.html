@@ -7,8 +7,25 @@
         <link rel="stylesheet" href="styles.css" />
         <link rel="icon" type="image/x-icon" href="/img/favicon.png" />
     </head>
+
     <body>
         <div class="site-container">
+            <!-- PIN ENTRY -->
+            <div id="pin-overlay" class="pin-overlay">
+                <div class="pin-container">
+                    <h2>Enter PIN to Access Feedback</h2>
+                    <input
+                        type="password"
+                        id="pin-input"
+                        maxlength="4"
+                        placeholder="Enter PIN"
+                    />
+                    <button class="general-button" onclick="validatePin()">
+                        Submit
+                    </button>
+                </div>
+            </div>
+
             <header>
                 <img
                     id="site-logo"

@@ -51,3 +51,47 @@ document.querySelectorAll(".feedback img").forEach((img) => {
         window.speechSynthesis.speak(speech);
     };
 });
+
+// Check for existing session on page load
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const response = await fetch("/check-session", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (response.ok) {
+            document.getElementById("pin-overlay").style.display = "none";
+            document.querySelector(".site-container").style.display = "flex";
+        }
+    } catch (error) {
+        // Session invalid or expired - PIN overlay stays visible
+        console.log("New session required");
+    }
+});
+
+async function validatePin() {
+    const pinInput = document.getElementById("pin-input").value;
+
+    try {
+        const response = await fetch("/validate-pin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ pin: pinInput }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById("pin-overlay").style.display = "none";
+            document.querySelector(".site-container").style.display = "flex";
+        } else {
+            alert("Invalid PIN");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error validating PIN");
+    }
+}
