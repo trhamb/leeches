@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Feedback Setup</title>
+        <link rel="stylesheet" href="/styles.css" />
+        <link rel="icon" type="image/x-icon" href="/img/favicon.png" />
+    </head>
+    <body>
+        <div class="admin-container">
+            <div class="wrapper">
+                <div class="top-bar">
+                    <div class="title-wrapper">
+                        <img src="/img/logo.png" alt="" />
+                        <h1>Feedback Setup</h1>
+                    </div>
+                    <div class="button-wrapper">
+                        <a href="/admin"
+                            ><button class="general-button box-shadow">
+                                Dashboard
+                            </button></a
+                        >
+                        <button id="logout" class="box-shadow">Logout</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="setup-control box-shadow">
+                        <div class="title-bar">
+                            <h2>Feedback Configuration</h2>
+                        </div>
+                        <div class="box-content">
+                            <form
+                                class="setup-form"
+                                onsubmit="saveSetup(event)"
+                            >
+                                <label for="ratingSystem">Rating System:</label>
+                                <select id="ratingSystem" required>
+                                    <option value="smileys">
+                                        Smiley Faces - "How do you feel after
+                                        your visit to SSW?"
+                                    </option>
+                                    <option value="stars">
+                                        Star Rating - "Please rate your
+                                        experience at SSW"
+                                    </option>
+                                </select>
+
+                                <button
+                                    type="submit"
+                                    class="general-button box-shadow"
+                                >
+                                    Save Configuration
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="js/setup.js"></script>
+        <script src="js/generalFunctions.js"></script>
+    </body>
+</html>

@@ -115,9 +115,9 @@ body {
 
     #feedback-popup {
         position: fixed;
-        top: 50%;
+        bottom: 50px;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translateX(-50%);
         background-color: rgba(0, 0, 0, 0.9);
         color: white;
         padding: 30px;
@@ -480,9 +480,9 @@ body {
 
     #feedback-popup {
         position: fixed;
-        top: 50%;
+        bottom: 50px;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translateX(-50%);
         background-color: rgba(0, 0, 0, 0.9);
         color: white;
         padding: 30px;
@@ -491,6 +491,7 @@ body {
         text-align: center;
         font-size: 3.5rem;
         font-weight: 500;
+        transition: 0.2s;
     }
 
     .button-wrapper {
@@ -678,5 +679,67 @@ body {
 
     #generateReport {
         width: 210px;
+    }
+
+    /* SETUP PAGE */
+    .setup-control {
+        width: 100%;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .setup-control form {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 130px;
+    }
+
+    .setup-control form input,
+    .setup-control form select {
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+    /* Star Rating Styles */
+    #starRating {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .star {
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .star path {
+        fill: #e0e0e0; /* Default gray color */
+    }
+
+    .star.active path {
+        fill: #ffd700; /* Gold color when active */
+    }
+
+    /* When stars to the left should also be filled */
+    .star.active ~ .star path {
+        fill: #ffd700;
+        stroke: #ffa000;
+    }
+
+    /* Hover effect for all stars up to the hovered one */
+    .star.active ~ .star path {
+        fill: #e0e0e0;
+        stroke: #bdbdbd;
     }
 }

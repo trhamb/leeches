@@ -17,6 +17,11 @@
                     </div>
 
                     <div class="button-wrapper">
+                        <a href="/setup"
+                            ><button class="general-button box-shadow">
+                                Setup
+                            </button></a
+                        >
                         <a href="/reports"
                             ><button class="general-button box-shadow">
                                 Reports
@@ -82,14 +87,14 @@
                                 />
                                 <select id="feedbackFilter">
                                     <option value="">All Feedback</option>
-                                    <option value="Very Happy">
-                                        Very Happy
+                                    <option value="5">
+                                        Very Happy / 5 Stars
                                     </option>
-                                    <option value="Happy">Happy</option>
-                                    <option value="Neutral">Neutral</option>
-                                    <option value="Unhappy">Unhappy</option>
-                                    <option value="Very Unhappy">
-                                        Very Unhappy
+                                    <option value="4">Happy / 4 Stars</option>
+                                    <option value="3">Neutral / 3 Stars</option>
+                                    <option value="2">Unhappy / 2 Stars</option>
+                                    <option value="1">
+                                        Very Unhappy / 1 Star
                                     </option>
                                 </select>
                                 <select id="tagFilter">
@@ -120,5 +125,6 @@
         </div>
 
         <script src="js/admin.js"></script>
+        <script src="js/generalFunctions.js"></script>
     </body>
 </html>

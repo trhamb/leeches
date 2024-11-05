@@ -39,6 +39,7 @@ function displayTypeCount(data, elementId) {
 }
 
 function displayFeedbackTable(data) {
+    console.log("Feedback entries:", data);
     const tbody = document.getElementById("feedbackTableBody");
     tbody.innerHTML = "";
 
@@ -48,9 +49,13 @@ function displayFeedbackTable(data) {
 
     pageData.forEach((entry) => {
         const row = document.createElement("tr");
+        const formattedFeedback = formatFeedbackDisplay(
+            entry.feedback,
+            entry.feedback_type
+        );
         row.innerHTML = `
             <td>${new Date(entry.created_at).toLocaleString()}</td>
-            <td>${entry.feedback}</td>
+            <td>${formattedFeedback}</td>
             <td>${entry.tag}</td>
         `;
         tbody.appendChild(row);
@@ -61,12 +66,8 @@ function displayFeedbackTable(data) {
     document.getElementById(
         "pageInfo"
     ).textContent = `Page ${currentPage} of ${totalPages}`;
-
-    // Update button states
     document.getElementById("prevPage").disabled = currentPage === 1;
     document.getElementById("nextPage").disabled = currentPage === totalPages;
-
-    // Total count
     document.getElementById(
         "totalCount"
     ).textContent = `Total Entries: ${data.length}`;
@@ -89,6 +90,21 @@ function applyFilters() {
 
     currentPage = 1;
     displayFeedbackTable(filteredData);
+}
+
+function formatFeedbackDisplay(value, type) {
+    if (type === "stars") {
+        return `${value} Stars`;
+    } else {
+        const smileyMap = {
+            5: "Very Happy",
+            4: "Happy",
+            3: "Neutral",
+            2: "Unhappy",
+            1: "Very Unhappy",
+        };
+        return smileyMap[value];
+    }
 }
 
 // Modify the existing loadDashboard function to include table initialization

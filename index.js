@@ -50,6 +50,15 @@ const checkAuth = async (req, res, next) => {
     next();
 };
 
+app.get("/session", async (req, res) => {
+    const { user } = supabase.auth.api.getUserByCookie(req);
+    if (user) {
+        res.status(200).send(user);
+    } else {
+        res.status(401).send("Unauthorized");
+    }
+});
+
 const checkFeedbackSession = (req, res, next) => {
     const sessionId = req.cookies["feedback-session"];
     if (!sessionManager.validateSession(sessionId)) {
@@ -89,6 +98,14 @@ app.get("/admin", checkAuth, (req, res) => {
     res.sendFile(path.join(__dirname, "protected", "admin.html"));
 });
 
+app.get("/reports", checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, "protected", "reports.html"));
+});
+
+app.get("/setup", checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, "protected", "setup.html"));
+});
+
 app.use(cookieParser());
 
 // Update your login endpoint
@@ -110,8 +127,9 @@ app.post("/login", async (req, res) => {
     res.status(200).json(data);
 });
 
+// Submit Feedback
 app.post("/submit-feedback", checkFeedbackSession, async (req, res) => {
-    const { feedback } = req.body;
+    const { feedback, feedbackType } = req.body;
     try {
         const { data: settings } = await supabase
             .from("event_tags")
@@ -122,6 +140,7 @@ app.post("/submit-feedback", checkFeedbackSession, async (req, res) => {
         const { data, error } = await supabase.from("feedback").insert([
             {
                 feedback,
+                feedback_type: feedbackType,
                 tag: settings?.tag_name || "untagged",
             },
         ]);
@@ -134,6 +153,7 @@ app.post("/submit-feedback", checkFeedbackSession, async (req, res) => {
     }
 });
 
+// Admin Stats
 app.get("/admin/stats", checkAuth, async (req, res) => {
     try {
         const { data: allFeedback } = await supabase
@@ -196,6 +216,7 @@ app.get("/admin/stats", checkAuth, async (req, res) => {
     }
 });
 
+// Update Tag
 app.post("/admin/update-tag", checkAuth, async (req, res) => {
     const { tag, isNew } = req.body;
 
@@ -242,25 +263,7 @@ app.post("/admin/update-tag", checkAuth, async (req, res) => {
     }
 });
 
-app.post("/logout", async (req, res) => {
-    const { error } = await supabase.auth.signOut();
-    if (error) return res.status(400).send(error.message);
-    res.status(200).send("Logged out");
-});
-
-app.get("/session", async (req, res) => {
-    const { user } = supabase.auth.api.getUserByCookie(req);
-    if (user) {
-        res.status(200).send(user);
-    } else {
-        res.status(401).send("Unauthorized");
-    }
-});
-
-app.get("/reports", checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, "protected", "reports.html"));
-});
-
+// Generate Report
 app.post("/reports/generate", checkAuth, async (req, res) => {
     const { tag, startDate, endDate, format } = req.body;
     const adjustedEndDate = new Date(endDate);
@@ -537,6 +540,69 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
         console.error("Error generating report:", error);
         res.status(500).send("Error generating report");
     }
+});
+
+// ADMIN PAGE SETUP
+app.get("/admin/config", checkAuth, async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from("feedback_config")
+            .select("*")
+            .eq("is_active", true)
+            .single();
+
+        if (error) throw error;
+        res.json(
+            data || {
+                prompt_text: "How do you feel about SSW?",
+                rating_system: "smileys",
+            }
+        );
+    } catch (error) {
+        console.error("Error fetching config:", error);
+        res.status(500).send("Error fetching configuration");
+    }
+});
+
+// Admin Page Config
+app.get("/config", async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from("feedback_config")
+            .select("*")
+            .eq("is_active", true)
+            .single();
+
+        if (error) throw error;
+        res.json(data);
+    } catch (error) {
+        console.error("Error fetching config:", error);
+        res.status(500).send("Error fetching configuration");
+    }
+});
+
+app.post("/admin/config", checkAuth, async (req, res) => {
+    const { rating_system } = req.body;
+    try {
+        // Set the selected config to active
+        const { error } = await supabase
+            .from("feedback_config")
+            .update({ is_active: true })
+            .eq("rating_system", rating_system);
+
+        if (error) throw error;
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error saving config:", error);
+        res.status(500).send("Error saving configuration");
+    }
+});
+
+// Logout
+app.post("/logout", async (req, res) => {
+    const { error } = await supabase.auth.signOut();
+    if (error) return res.status(400).send(error.message);
+    res.status(200).send("Logged out");
 });
 
 app.listen(port, () => {

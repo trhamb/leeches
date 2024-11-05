@@ -23,6 +23,7 @@
                     <button class="general-button" onclick="validatePin()">
                         Submit
                     </button>
+                    <a href="/admin">Dashboard</a>
                 </div>
             </div>
 
@@ -32,12 +33,11 @@
                     src="img/logo.png"
                     alt="The Sight Support Worthing Logo"
                 />
-                <h1 onclick="speakText(this.textContent)">
-                    How do you feel after your visit to SSW?
-                </h1>
+                <h1 id="feedbackPrompt">Loading...</h1>
             </header>
 
-            <div class="feedback">
+            <!-- Smiley Rating System -->
+            <div class="feedback" id="smileyRating">
                 <img id="feedback-5" src="img/5.png" alt="A very happy face" />
                 <img id="feedback-4" src="img/4.png" alt="A happy face" />
                 <img id="feedback-3" src="img/3.png" alt="A neutral face" />
@@ -47,6 +47,35 @@
                     src="img/1.png"
                     alt="A very unhappy face"
                 />
+            </div>
+
+            <!-- Star Rating System -->
+            <div class="feedback" id="starRating" style="display: none">
+                <svg class="star" id="star-1" viewBox="0 0 51 48">
+                    <path
+                        d="m25,1 6,17h18l-14,11 5,17-15-10-15,10 5-17-14-11h18z"
+                    />
+                </svg>
+                <svg class="star" id="star-2" viewBox="0 0 51 48">
+                    <path
+                        d="m25,1 6,17h18l-14,11 5,17-15-10-15,10 5-17-14-11h18z"
+                    />
+                </svg>
+                <svg class="star" id="star-3" viewBox="0 0 51 48">
+                    <path
+                        d="m25,1 6,17h18l-14,11 5,17-15-10-15,10 5-17-14-11h18z"
+                    />
+                </svg>
+                <svg class="star" id="star-4" viewBox="0 0 51 48">
+                    <path
+                        d="m25,1 6,17h18l-14,11 5,17-15-10-15,10 5-17-14-11h18z"
+                    />
+                </svg>
+                <svg class="star" id="star-5" viewBox="0 0 51 48">
+                    <path
+                        d="m25,1 6,17h18l-14,11 5,17-15-10-15,10 5-17-14-11h18z"
+                    />
+                </svg>
             </div>
 
             <!-- Pop-up element -->
