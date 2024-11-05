@@ -162,14 +162,11 @@ app.get("/admin/stats", checkAuth, async (req, res) => {
             .order("created_at", { ascending: false });
 
         const totalByType = {
-            "Very Happy": allFeedback.filter((f) => f.feedback === "Very Happy")
-                .length,
-            Happy: allFeedback.filter((f) => f.feedback === "Happy").length,
-            Neutral: allFeedback.filter((f) => f.feedback === "Neutral").length,
-            Unhappy: allFeedback.filter((f) => f.feedback === "Unhappy").length,
-            "Very Unhappy": allFeedback.filter(
-                (f) => f.feedback === "Very Unhappy"
-            ).length,
+            5: allFeedback.filter((f) => f.feedback === "5").length,
+            4: allFeedback.filter((f) => f.feedback === "4").length,
+            3: allFeedback.filter((f) => f.feedback === "3").length,
+            2: allFeedback.filter((f) => f.feedback === "2").length,
+            1: allFeedback.filter((f) => f.feedback === "1").length,
         };
 
         const today = new Date().toISOString().split("T")[0];
@@ -178,19 +175,21 @@ app.get("/admin/stats", checkAuth, async (req, res) => {
         );
 
         const todayByType = {
-            "Very Happy": todayFeedback.filter(
-                (f) => f.feedback === "Very Happy"
-            ).length,
-            Happy: todayFeedback.filter((f) => f.feedback === "Happy").length,
-            Neutral: todayFeedback.filter((f) => f.feedback === "Neutral")
-                .length,
-            Unhappy: todayFeedback.filter((f) => f.feedback === "Unhappy")
-                .length,
-            "Very Unhappy": todayFeedback.filter(
-                (f) => f.feedback === "Very Unhappy"
-            ).length,
+            5: todayFeedback.filter((f) => f.feedback === "5").length,
+            4: todayFeedback.filter((f) => f.feedback === "4").length,
+            3: todayFeedback.filter((f) => f.feedback === "3").length,
+            2: todayFeedback.filter((f) => f.feedback === "2").length,
+            1: todayFeedback.filter((f) => f.feedback === "1").length,
         };
 
+        // Get current config to know which feedback type is active
+        const { data: currentConfig } = await supabase
+            .from("feedback_config")
+            .select("rating_system")
+            .eq("is_active", true)
+            .single();
+
+        // Get current tag
         const { data: currentTag } = await supabase
             .from("event_tags")
             .select("tag_name")
@@ -205,6 +204,7 @@ app.get("/admin/stats", checkAuth, async (req, res) => {
         res.json({
             total: totalByType,
             today: todayByType,
+            feedback_type: currentConfig?.rating_system || "smileys",
             currentTag: currentTag?.tag_name || "No tag set",
             recentFeedback: allFeedback.slice(0, 10),
             existingTags: existingTags,
@@ -270,13 +270,7 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
     adjustedEndDate.setHours(23, 59, 59, 999);
 
     try {
-        const feedbackTypes = [
-            "Very Happy",
-            "Happy",
-            "Neutral",
-            "Unhappy",
-            "Very Unhappy",
-        ];
+        const feedbackTypes = ["5", "4", "3", "2", "1"];
 
         const { data: feedbackData } = await supabase
             .from("feedback")
@@ -288,7 +282,7 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
 
         // Handle CSV Export
         if (format === "csv") {
-            const csvHeader = "Feedback,Tag,Date\n";
+            const csvHeader = "Rating,Tag,Date\n";
             const csvRows = feedbackData
                 .map((entry) => {
                     const date = new Date(

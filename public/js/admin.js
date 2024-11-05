@@ -25,12 +25,20 @@ function handleAuthError(error) {
 }
 
 function displayTypeCount(data, elementId) {
+    const ratingLabels = {
+        5: "Very Happy / 5 Stars",
+        4: "Happy / 4 Stars",
+        3: "Neutral / 3 Stars",
+        2: "Unhappy / 2 Stars",
+        1: "Very Unhappy / 1 Star",
+    };
+
     const container = document.getElementById(elementId);
     container.innerHTML = Object.entries(data)
         .map(
-            ([type, count]) => `
+            ([value, count]) => `
             <div class="type-count">
-                <span class="type">${type}:</span>
+                <span class="type">${ratingLabels[value]}:</span>
                 <span class="count">${count}</span>
             </div>
         `

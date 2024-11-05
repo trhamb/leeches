@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "/login?message=no_token";
         return;
     }
-    // Continue with page initialization
 });
 
 async function loadCharts() {
@@ -22,6 +21,8 @@ async function loadCharts() {
         }
 
         const stats = await response.json();
+        console.log("Stats data:", stats);
+
         document.getElementById("currentTagDisplay").textContent =
             stats.currentTag || "No tag set";
 
@@ -33,10 +34,10 @@ async function loadCharts() {
             new Chart(ctx1, {
                 type: "bar",
                 data: {
-                    labels: Object.keys(stats.total),
+                    labels: Object.keys(stats.total).reverse(),
                     datasets: [
                         {
-                            data: Object.values(stats.total),
+                            data: Object.values(stats.total).reverse(),
                             backgroundColor: [
                                 "rgba(54, 162, 235, 0.8)",
                                 "rgba(75, 192, 192, 0.8)",
@@ -61,26 +62,28 @@ async function loadCharts() {
                     },
                 },
             });
-        } else {
-            document.getElementById("feedbackChart").innerHTML =
-                "<p>No feedback data available</p>";
         }
 
         // Current tag feedback chart
         const currentTagData = {
-            "Very Happy": 0,
-            Happy: 0,
-            Neutral: 0,
-            Unhappy: 0,
-            "Very Unhappy": 0,
+            5: 0,
+            4: 0,
+            3: 0,
+            2: 0,
+            1: 0,
         };
 
         if (stats.allFeedback && stats.allFeedback.length > 0) {
-            stats.allFeedback
-                .filter((entry) => entry.tag === stats.currentTag)
-                .forEach((entry) => {
-                    currentTagData[entry.feedback]++;
-                });
+            const currentTagFeedback = stats.allFeedback.filter(
+                (entry) => entry.tag === stats.currentTag
+            );
+            console.log("Current tag feedback:", currentTagFeedback);
+
+            currentTagFeedback.forEach((entry) => {
+                currentTagData[entry.feedback]++;
+            });
+
+            console.log("Processed current tag data:", currentTagData);
 
             const ctx2 = document
                 .getElementById("currentTagChart")
@@ -88,10 +91,10 @@ async function loadCharts() {
             new Chart(ctx2, {
                 type: "bar",
                 data: {
-                    labels: Object.keys(currentTagData),
+                    labels: Object.keys(currentTagData).reverse(),
                     datasets: [
                         {
-                            data: Object.values(currentTagData),
+                            data: Object.values(currentTagData).reverse(),
                             backgroundColor: [
                                 "rgba(54, 162, 235, 0.8)",
                                 "rgba(75, 192, 192, 0.8)",
