@@ -269,6 +269,17 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
     const adjustedEndDate = new Date(endDate);
     adjustedEndDate.setHours(23, 59, 59, 999);
 
+    function formatFeedbackForReport(value) {
+        const ratingLabels = {
+            5: "Very Satisfied",
+            4: "Satisfied",
+            3: "Neutral",
+            2: "Unsatisfied",
+            1: "Very Unsatisfied",
+        };
+        return ratingLabels[value];
+    }
+
     try {
         const feedbackTypes = ["5", "4", "3", "2", "1"];
 
@@ -285,10 +296,13 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
             const csvHeader = "Rating,Tag,Date\n";
             const csvRows = feedbackData
                 .map((entry) => {
+                    const formattedFeedback = formatFeedbackForReport(
+                        entry.feedback
+                    );
                     const date = new Date(
                         entry.created_at
                     ).toLocaleDateString();
-                    return `${entry.feedback},${entry.tag},${date}`;
+                    return `${formattedFeedback},${entry.tag},${date}`;
                 })
                 .join("\n");
 
@@ -316,7 +330,9 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
         barChart.setConfig({
             type: "bar",
             data: {
-                labels: feedbackTypes,
+                labels: feedbackTypes.map((type) =>
+                    formatFeedbackForReport(type)
+                ),
                 datasets: [
                     {
                         label: "Feedback Distribution",
@@ -352,7 +368,9 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
         pieChart.setConfig({
             type: "pie",
             data: {
-                labels: feedbackTypes,
+                labels: feedbackTypes.map((type) =>
+                    formatFeedbackForReport(type)
+                ),
                 datasets: [
                     {
                         data: feedbackTypes.map((type) => {
@@ -429,6 +447,34 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
         summarySheet.getCell("A5").font = { bold: true, size: 12 };
         summarySheet.getCell("B5").value = feedbackData.length;
 
+        // Set cell colours
+        const cellColors = [
+            "FF00B050", // Green
+            "FF92D050", // Blue
+            "FFFFFF00", // Yellow
+            "FFFFC000", // Orange
+            "FFFF0000", // Red
+        ];
+
+        feedbackTypes.forEach((type, index) => {
+            const count = feedbackData.filter(
+                (f) => f.feedback === type
+            ).length;
+            const percentage = ((count / feedbackData.length) * 100).toFixed(1);
+
+            const rowNum = 10 + index;
+            summarySheet.getCell(`A${rowNum}`).value =
+                formatFeedbackForReport(type);
+            summarySheet.getCell(`B${rowNum}`).value = count;
+            summarySheet.getCell(`C${rowNum}`).value = `${percentage}%`;
+
+            summarySheet.getCell(`A${rowNum}`).fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: cellColors[index] },
+            };
+        });
+
         // Add distribution headers
         summarySheet.mergeCells("A8:C8");
         summarySheet.getCell("A8").value = "Feedback Distribution";
@@ -454,10 +500,13 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
             ).length;
             const percentage = ((count / feedbackData.length) * 100).toFixed(1);
 
-            summarySheet.getCell(`A${10 + index}`).value = type;
+            summarySheet.getCell(`A${10 + index}`).value =
+                formatFeedbackForReport(type);
             summarySheet.getCell(`B${10 + index}`).value = count;
             summarySheet.getCell(`C${10 + index}`).value = `${percentage}%`;
         });
+
+        // Add new section here
 
         // Add both charts to sheet (side by side)
         summarySheet.addImage(barImageId, {
@@ -484,7 +533,7 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
 
         // Raw Data Sheet
         rawDataSheet.columns = [
-            { header: "Feedback", key: "feedback", width: 32 },
+            { header: "Rating", key: "feedback", width: 32 },
             { header: "Tag", key: "tag", width: 14 },
             { header: "Date", key: "date", width: 15 },
         ];
@@ -500,7 +549,7 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
         // Add data
         feedbackData.forEach((entry) => {
             rawDataSheet.addRow({
-                feedback: entry.feedback,
+                feedback: formatFeedbackForReport(entry.feedback),
                 tag: entry.tag,
                 date: new Date(entry.created_at).toLocaleDateString(),
             });

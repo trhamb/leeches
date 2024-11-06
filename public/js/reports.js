@@ -6,6 +6,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+const ratingLabels = {
+    5: "Very Satisfied",
+    4: "Satisfied",
+    3: "Neutral",
+    2: "Unsatisfied",
+    1: "Very Unsatisfied",
+};
+
 async function loadCharts() {
     try {
         const response = await fetch("/admin/stats", {
@@ -21,8 +29,6 @@ async function loadCharts() {
         }
 
         const stats = await response.json();
-        console.log("Stats data:", stats);
-
         document.getElementById("currentTagDisplay").textContent =
             stats.currentTag || "No tag set";
 
@@ -34,7 +40,9 @@ async function loadCharts() {
             new Chart(ctx1, {
                 type: "bar",
                 data: {
-                    labels: Object.keys(stats.total).reverse(),
+                    labels: Object.keys(stats.total)
+                        .reverse()
+                        .map((key) => ratingLabels[key]),
                     datasets: [
                         {
                             data: Object.values(stats.total).reverse(),
@@ -48,6 +56,7 @@ async function loadCharts() {
                         },
                     ],
                 },
+                // Add this to both chart configurations in the options section:
                 options: {
                     responsive: true,
                     plugins: {
@@ -58,6 +67,12 @@ async function loadCharts() {
                     scales: {
                         y: {
                             beginAtZero: true,
+                        },
+                        x: {
+                            ticks: {
+                                align: "center",
+                                textAlign: "center",
+                            },
                         },
                     },
                 },
@@ -77,13 +92,10 @@ async function loadCharts() {
             const currentTagFeedback = stats.allFeedback.filter(
                 (entry) => entry.tag === stats.currentTag
             );
-            console.log("Current tag feedback:", currentTagFeedback);
 
             currentTagFeedback.forEach((entry) => {
                 currentTagData[entry.feedback]++;
             });
-
-            console.log("Processed current tag data:", currentTagData);
 
             const ctx2 = document
                 .getElementById("currentTagChart")
@@ -91,7 +103,9 @@ async function loadCharts() {
             new Chart(ctx2, {
                 type: "bar",
                 data: {
-                    labels: Object.keys(currentTagData).reverse(),
+                    labels: Object.keys(currentTagData)
+                        .reverse()
+                        .map((key) => ratingLabels[key]),
                     datasets: [
                         {
                             data: Object.values(currentTagData).reverse(),
