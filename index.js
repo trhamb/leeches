@@ -507,6 +507,57 @@ app.post("/reports/generate", checkAuth, async (req, res) => {
         });
 
         // Add new section here
+        summarySheet.mergeCells("A17:C17");
+        summarySheet.getCell("A17").value = "Generalized Distribution";
+        summarySheet.getCell("A17").font = { bold: true, size: 12 };
+        summarySheet.getCell("A17").alignment = { horizontal: "center" };
+
+        // Add column headers
+        summarySheet.getCell("A18").value = "Response Type";
+        summarySheet.getCell("B18").value = "Count";
+        summarySheet.getCell("C18").value = "Percentage";
+        ["A18", "B18", "C18"].forEach((cell) => {
+            summarySheet.getCell(cell).font = { bold: true };
+            summarySheet.getCell(cell).fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFE0E0E0" },
+            };
+        });
+
+        // Calculate merged counts
+        const goodCount = feedbackData.filter(
+            (f) => f.feedback === "5" || f.feedback === "4"
+        ).length;
+        const neutralCount = feedbackData.filter(
+            (f) => f.feedback === "3"
+        ).length;
+        const badCount = feedbackData.filter(
+            (f) => f.feedback === "2" || f.feedback === "1"
+        ).length;
+        const total = feedbackData.length;
+
+        // Add the generalized data
+        const generalizedData = [
+            { type: "Good", count: goodCount, color: "FF00B050" },
+            { type: "Neutral", count: neutralCount, color: "FFFFFF00" },
+            { type: "Bad", count: badCount, color: "FFFF0000" },
+        ];
+
+        generalizedData.forEach((item, index) => {
+            const rowNum = 19 + index;
+            const percentage = ((item.count / total) * 100).toFixed(1);
+
+            summarySheet.getCell(`A${rowNum}`).value = item.type;
+            summarySheet.getCell(`B${rowNum}`).value = item.count;
+            summarySheet.getCell(`C${rowNum}`).value = `${percentage}%`;
+
+            summarySheet.getCell(`A${rowNum}`).fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: item.color },
+            };
+        });
 
         // Add both charts to sheet (side by side)
         summarySheet.addImage(barImageId, {
